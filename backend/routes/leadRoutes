@@ -1,0 +1,247 @@
+const express = require("express");
+const { db } = require("../db");
+const authMiddleware = require("../middleware/authMiddleware");
+
+const router = express.Router();
+
+/*
+  GET /api/leads
+  Get all leads with optional filters:
+  ?status=New
+  ?source=LinkedIn
+  ?salesperson=Admin User
+  ?search=nimal
+*/
+router.get("/", authMiddleware, (req, res) => {
+    const { status, source, salesperson, search } = req.query;
+
+    let sql = "SELECT * FROM leads";
+    const conditions = [];
+    const params = [];
+
+    if (status) {
+        conditions.push("status = ?");
+        params.push(status);
+    }
+
+    if (source) {
+        conditions.push("lead_source = ?");
+        params.push(source);
+    }
+
+    if (salesperson) {
+        conditions.push("assigned_salesperson = ?");
+        params.push(salesperson);
+    }
+
+    if (search) {
+        conditions.push(
+            "(lead_name LIKE ? OR company_name LIKE ? OR email LIKE ?)"
+        );
+        params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    }
+
+    if (conditions.length > 0) {
+        sql += " WHERE " + conditions.join(" AND ");
+    }
+
+    sql += " ORDER BY created_at DESC";
+
+    db.all(sql, params, (err, rows) => {
+        if (err) {
+            return res.status(500).json({
+                message: "Failed to fetch leads",
+                error: err.message,
+            });
+        }
+
+        res.json(rows);
+    });
+});
+
+/*
+  GET /api/leads/:id
+  Get one lead by ID
+*/
+router.get("/:id", authMiddleware, (req, res) => {
+    const { id } = req.params;
+
+    db.get("SELECT * FROM leads WHERE id = ?", [id], (err, lead) => {
+        if (err) {
+            return res.status(500).json({
+                message: "Failed to fetch lead",
+                error: err.message,
+            });
+        }
+
+        if (!lead) {
+            return res.status(404).json({
+                message: "Lead not found",
+            });
+        }
+
+        res.json(lead);
+    });
+});
+
+/*
+  POST /api/leads
+  Create new lead
+*/
+router.post("/", authMiddleware, (req, res) => {
+    const {
+        lead_name,
+        company_name,
+        email,
+        phone,
+        lead_source,
+        assigned_salesperson,
+        status,
+        estimated_deal_value,
+    } = req.body;
+
+    if (!lead_name || !company_name || !email) {
+        return res.status(400).json({
+            message: "Lead name, company name, and email are required.",
+        });
+    }
+
+    const sql = `
+    INSERT INTO leads (
+      lead_name,
+      company_name,
+      email,
+      phone,
+      lead_source,
+      assigned_salesperson,
+      status,
+      estimated_deal_value
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+    const params = [
+        lead_name,
+        company_name,
+        email,
+        phone || "",
+        lead_source || "Other",
+        assigned_salesperson || "Admin User",
+        status || "New",
+        estimated_deal_value || 0,
+    ];
+
+    db.run(sql, params, function (err) {
+        if (err) {
+            return res.status(500).json({
+                message: "Failed to create lead",
+                error: err.message,
+            });
+        }
+
+        res.status(201).json({
+            message: "Lead created successfully",
+            leadId: this.lastID,
+        });
+    });
+});
+
+/*
+  PUT /api/leads/:id
+  Update existing lead
+*/
+router.put("/:id", authMiddleware, (req, res) => {
+    const { id } = req.params;
+
+    const {
+        lead_name,
+        company_name,
+        email,
+        phone,
+        lead_source,
+        assigned_salesperson,
+        status,
+        estimated_deal_value,
+    } = req.body;
+
+    if (!lead_name || !company_name || !email) {
+        return res.status(400).json({
+            message: "Lead name, company name, and email are required.",
+        });
+    }
+
+    const sql = `
+    UPDATE leads
+    SET
+      lead_name = ?,
+      company_name = ?,
+      email = ?,
+      phone = ?,
+      lead_source = ?,
+      assigned_salesperson = ?,
+      status = ?,
+      estimated_deal_value = ?,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `;
+
+    const params = [
+        lead_name,
+        company_name,
+        email,
+        phone || "",
+        lead_source || "Other",
+        assigned_salesperson || "Admin User",
+        status || "New",
+        estimated_deal_value || 0,
+        id,
+    ];
+
+    db.run(sql, params, function (err) {
+        if (err) {
+            return res.status(500).json({
+                message: "Failed to update lead",
+                error: err.message,
+            });
+        }
+
+        if (this.changes === 0) {
+            return res.status(404).json({
+                message: "Lead not found",
+            });
+        }
+
+        res.json({
+            message: "Lead updated successfully",
+        });
+    });
+});
+
+/*
+  DELETE /api/leads/:id
+  Delete lead
+*/
+router.delete("/:id", authMiddleware, (req, res) => {
+    const { id } = req.params;
+
+    db.run("DELETE FROM leads WHERE id = ?", [id], function (err) {
+        if (err) {
+            return res.status(500).json({
+                message: "Failed to delete lead",
+                error: err.message,
+            });
+        }
+
+        if (this.changes === 0) {
+            return res.status(404).json({
+                message: "Lead not found",
+            });
+        }
+
+        res.json({
+            message: "Lead deleted successfully",
+        });
+    });
+});
+
+module.exports = router;

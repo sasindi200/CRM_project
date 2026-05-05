@@ -5,6 +5,7 @@ const cors = require("cors");
 const { initDatabase } = require("./db");
 
 const authRoutes = require("./routes/authRoutes");
+const leadRoutes = require("./routes/leadRoutes");
 const authMiddleware = require("./middleware/authMiddleware");
 
 const app = express();
@@ -22,6 +23,9 @@ app.get("/", (req, res) => {
 
 // Auth routes
 app.use("/api/auth", authRoutes);
+
+// Lead routes
+app.use("/api/leads", leadRoutes);
 
 // Protected test route
 app.get("/api/protected", authMiddleware, (req, res) => {
