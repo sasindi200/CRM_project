@@ -6,6 +6,7 @@ const { initDatabase } = require("./db");
 
 const authRoutes = require("./routes/authRoutes");
 const leadRoutes = require("./routes/leadRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 const authMiddleware = require("./middleware/authMiddleware");
 
 const app = express();
@@ -13,21 +14,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Initialize database
 initDatabase();
 
-// Public route
 app.get("/", (req, res) => {
     res.send("CRM Backend is running");
 });
 
-// Auth routes
 app.use("/api/auth", authRoutes);
-
-// Lead routes
 app.use("/api/leads", leadRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
-// Protected test route
 app.get("/api/protected", authMiddleware, (req, res) => {
     res.json({
         message: "You are authorized",
