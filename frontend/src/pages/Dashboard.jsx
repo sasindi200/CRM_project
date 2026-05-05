@@ -44,53 +44,52 @@ function Dashboard() {
 
     return (
         <div className="dashboard-page">
-            <div className="dashboard-header">
-                <div>
-                    <h1>CRM Dashboard</h1>
-                    <p>Welcome, {user?.name || "Admin User"}</p>
-                </div>
-
-                <button className="logout-button" onClick={handleLogout}>
-                    Logout
-                </button>
-            </div>
-
             {error && <div className="error-message">{error}</div>}
 
-            <div className="stats-grid">
-                <div className="stat-card">
+            <div className="bento-grid">
+                <div className="bento-card header-card">
+                    <div>
+                        <h1>CRM Dashboard</h1>
+                        <p>Welcome, {user?.name || "Admin User"}</p>
+                    </div>
+                    <button className="logout-button" onClick={handleLogout}>
+                        Logout
+                    </button>
+                </div>
+
+                <div className="bento-card main-metric">
+                    <h3>Total Won Deal Value</h3>
+                    <p>Rs. {(stats?.totalWonDealValue || 0).toLocaleString()}</p>
+                </div>
+
+                <div className="bento-card financial-card">
+                    <h3>Estimated Deal Value</h3>
+                    <p>Rs. {(stats?.totalEstimatedDealValue || 0).toLocaleString()}</p>
+                </div>
+
+                <div className="bento-card small-stat">
                     <h3>Total Leads</h3>
                     <p>{stats?.totalLeads || 0}</p>
                 </div>
 
-                <div className="stat-card">
+                <div className="bento-card small-stat">
                     <h3>New Leads</h3>
                     <p>{stats?.newLeads || 0}</p>
                 </div>
 
-                <div className="stat-card">
-                    <h3>Qualified Leads</h3>
+                <div className="bento-card small-stat">
+                    <h3>Qualified</h3>
                     <p>{stats?.qualifiedLeads || 0}</p>
                 </div>
 
-                <div className="stat-card">
+                <div className="bento-card small-stat">
                     <h3>Won Leads</h3>
                     <p>{stats?.wonLeads || 0}</p>
                 </div>
 
-                <div className="stat-card">
+                <div className="bento-card small-stat lost-card">
                     <h3>Lost Leads</h3>
                     <p>{stats?.lostLeads || 0}</p>
-                </div>
-
-                <div className="stat-card">
-                    <h3>Total Estimated Deal Value</h3>
-                    <p>Rs. {(stats?.totalEstimatedDealValue || 0).toLocaleString()}</p>
-                </div>
-
-                <div className="stat-card">
-                    <h3>Total Won Deal Value</h3>
-                    <p>Rs. {(stats?.totalWonDealValue || 0).toLocaleString()}</p>
                 </div>
             </div>
         </div>
