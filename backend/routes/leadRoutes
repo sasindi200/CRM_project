@@ -244,4 +244,90 @@ router.delete("/:id", authMiddleware, (req, res) => {
     });
 });
 
+/*
+  GET /api/leads/:id/notes
+  Get all notes for a specific lead
+*/
+router.get("/:id/notes", authMiddleware, (req, res) => {
+    const { id } = req.params;
+
+    const sql = `
+    SELECT * FROM notes
+    WHERE lead_id = ?
+    ORDER BY created_at DESC
+  `;
+
+    db.all(sql, [id], (err, notes) => {
+        if (err) {
+            return res.status(500).json({
+                message: "Failed to fetch notes",
+                error: err.message,
+            });
+        }
+
+        res.json(notes);
+    });
+});
+
+/*
+  POST /api/leads/:id/notes
+  Add a note to a specific lead
+*/
+router.post("/:id/notes", authMiddleware, (req, res) => {
+    const { id } = req.params;
+    const { note_content } = req.body;
+
+    if (!note_content) {
+        return res.status(400).json({
+            message: "Note content is required.",
+        });
+    }
+
+    // First check if the lead exists
+    db.get("SELECT * FROM leads WHERE id = ?", [id], (err, lead) => {
+        if (err) {
+            return res.status(500).json({
+                message: "Failed to check lead",
+                error: err.message,
+            });
+        }
+
+        if (!lead) {
+            return res.status(404).json({
+                message: "Lead not found",
+            });
+        }
+
+        const sql = `
+      INSERT INTO notes (
+        lead_id,
+        note_content,
+        created_by
+      )
+      VALUES (?, ?, ?)
+    `;
+
+        const params = [
+            id,
+            note_content,
+            req.user.name || "Admin User"
+        ];
+
+        db.run(sql, params, function (err) {
+            if (err) {
+                return res.status(500).json({
+                    message: "Failed to add note",
+                    error: err.message,
+                });
+            }
+
+            res.status(201).json({
+                message: "Note added successfully",
+                noteId: this.lastID,
+            });
+        });
+    });
+});
+
+
 module.exports = router;
