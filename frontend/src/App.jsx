@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import LeadList from "./pages/LeadList";
 import LeadForm from "./pages/LeadForm";
+import LeadDetail from "./pages/LeadDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./index.css";
 
@@ -46,6 +47,15 @@ function App() {
           element={
             <ProtectedRoute>
               <LeadForm />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/leads/:id"
+          element={
+            <ProtectedRoute>
+              <LeadDetail />
             </ProtectedRoute>
           }
         />

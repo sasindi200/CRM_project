@@ -200,6 +200,10 @@ function LeadList() {
                                             <td>Rs. {Number(lead.estimated_deal_value || 0).toLocaleString()}</td>
                                             <td>
                                                 <div className="table-actions">
+                                                    <Link to={`/leads/${lead.id}`} className="small-link">
+                                                        View
+                                                    </Link>
+
                                                     <Link to={`/leads/${lead.id}/edit`} className="small-link">
                                                         Edit
                                                     </Link>
