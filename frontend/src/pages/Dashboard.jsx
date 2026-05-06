@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import API from "../api";
 
 function Dashboard() {
@@ -52,9 +52,14 @@ function Dashboard() {
                         <h1>CRM Dashboard</h1>
                         <p>Welcome, {user?.name || "Admin User"}</p>
                     </div>
-                    <button className="logout-button" onClick={handleLogout}>
-                        Logout
-                    </button>
+                    <div className="header-actions">
+                        <Link to="/leads" className="primary-link">
+                            Manage Leads
+                        </Link>
+                        <button className="logout-button" onClick={handleLogout}>
+                            Logout
+                        </button>
+                    </div>
                 </div>
 
                 <div className="bento-card main-metric">
