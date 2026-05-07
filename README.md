@@ -168,3 +168,7 @@ To reset the database, simply delete `backend/database/crm.db` and restart the s
 This project covers the core CRUD cycle of a CRM and demonstrates a clean separation between a React SPA and a REST API backend. The use of SQLite keeps local setup completely friction-free — there's no database server to install or configure.
 
 A few things I'd approach differently in a production context: authentication would be backed by a proper `users` table with hashed passwords (the bcryptjs dependency is already there, just not wired up), CORS would be locked to specific origins, and the frontend's API base URL would be pulled from an environment variable at build time using Vite's `import.meta.env`. Adding a state management layer (Zustand or React Query) would also reduce the amount of repetitive `useState`/`useEffect` data-fetching boilerplate scattered across the page components.
+
+Created by:
+Sasindi Linasha Korala
+linashakorala@gmail.com
