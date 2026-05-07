@@ -537,6 +537,157 @@ button:disabled {
 }
 
 /* =========================
+   SALES TARGET TRACKER
+========================= */
+
+.target-card {
+  grid-column: span 4;
+  border-color: rgba(6, 182, 212, 0.2);
+}
+
+.target-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.target-header h3 {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #06b6d4;
+}
+
+.target-month {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.target-edit-btn {
+  background: #06b6d4;
+  border: none;
+  border-radius: 8px;
+  color: #000;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 18px;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: center;
+  width: fit-content;
+}
+
+.target-edit-btn:hover {
+  background: #22d3ee;
+}
+
+.target-amounts {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.target-won {
+  font-size: 32px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.target-divider {
+  font-size: 16px;
+  color: #475569;
+}
+
+.target-goal {
+  font-size: 20px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.progress-bar-track {
+  width: 100%;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.6s ease;
+  min-width: 4px;
+}
+
+.target-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.target-percent {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.target-achieved {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.target-remaining {
+  color: #475569;
+}
+
+.target-empty {
+  color: #475569;
+  font-size: 14px;
+  margin: 0;
+}
+
+.target-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.target-input {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 18px;
+  padding: 10px 14px;
+  width: 280px;
+  transition: border-color 0.2s ease;
+}
+
+.target-input:focus {
+  outline: none;
+  border-color: rgba(6, 182, 212, 0.5);
+}
+
+.target-edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.target-error {
+  color: #ef4444;
+  font-size: 13px;
+  margin: 0;
+}
+
+/* =========================
    COMMON PAGE LAYOUT
 ========================= */
 
@@ -579,7 +730,7 @@ button:disabled {
   .bento-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .header-card, .main-metric, .financial-card {
+  .header-card, .main-metric, .financial-card, .target-card {
     grid-column: span 2;
   }
 }
@@ -595,7 +746,7 @@ button:disabled {
     gap: 16px;
   }
   
-  .header-card, .main-metric, .financial-card, .small-stat {
+  .header-card, .main-metric, .financial-card, .small-stat, .target-card {
     grid-column: span 1;
   }
   
@@ -944,9 +1095,162 @@ tbody tr:hover {
 .note-meta {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 16px;
   font-size: 13px;
   color: #94a3b8;
+}
+
+.note-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.note-field:last-child {
+  margin-bottom: 0;
+}
+
+.note-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #06b6d4;
+}
+
+.note-field-value {
+  font-size: 14px;
+  color: #f8fafc;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.note-details {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.note-details .note-field {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+.note-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.note-icon-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #94a3b8;
+  font-size: 12px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.note-icon-btn:hover {
+  background: rgba(6, 182, 212, 0.12);
+  border-color: rgba(6, 182, 212, 0.4);
+  color: #06b6d4;
+}
+
+.note-icon-btn--delete:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+}
+
+.note-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.note-textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 12px 14px;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.note-textarea:focus {
+  outline: none;
+  border-color: rgba(6, 182, 212, 0.5);
+}
+
+.note-textarea::placeholder {
+  color: #475569;
+}
+
+.note-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.note-edit-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.note-action-btn {
+  font-size: 13px;
+  padding: 6px 16px;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 20px;
+  transition: opacity 0.2s ease;
+}
+
+.primary-btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.primary-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.secondary-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 20px;
+  transition: all 0.2s ease;
+}
+
+.secondary-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
 }
 
 @media (max-width: 768px) {

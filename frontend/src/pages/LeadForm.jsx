@@ -68,6 +68,25 @@ function LeadForm() {
             return;
         }
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            setError("Please enter a valid email address.");
+            return;
+        }
+
+        if (formData.phone) {
+            const phoneRegex = /^(\+\d{1,3})?\d{7,15}$/;
+            if (!phoneRegex.test(formData.phone.replace(/\s/g, ""))) {
+                setError("Phone number must be 7–15 digits, optionally starting with a country code.");
+                return;
+            }
+        }
+
+        if (formData.estimated_deal_value !== "" && Number(formData.estimated_deal_value) < 0) {
+            setError("Estimated deal value cannot be negative.");
+            return;
+        }
+
         try {
             const payload = {
                 ...formData,
@@ -205,6 +224,7 @@ function LeadForm() {
                                 value={formData.estimated_deal_value}
                                 onChange={handleChange}
                                 placeholder="250000"
+                                min="0"
                             />
                         </div>
                     </div>

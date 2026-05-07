@@ -53,6 +53,13 @@ function initDatabase() {
       )
     `);
 
+        db.run(`
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      )
+    `);
+
         console.log("Database tables created successfully");
     });
 }

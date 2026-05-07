@@ -9,29 +9,63 @@ function Dashboard() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
 
+    const [target, setTarget] = useState(0);
+    const [editingTarget, setEditingTarget] = useState(false);
+    const [targetInput, setTargetInput] = useState("");
+    const [targetError, setTargetError] = useState("");
+
     const user = JSON.parse(localStorage.getItem("user"));
 
-    const fetchDashboardStats = async () => {
+    const fetchAll = async () => {
         try {
-            const response = await API.get("/dashboard");
-            setStats(response.data);
+            const [dashRes, targetRes] = await Promise.all([
+                API.get("/dashboard"),
+                API.get("/settings/target"),
+            ]);
+            setStats(dashRes.data);
+            setTarget(targetRes.data.target || 0);
         } catch (err) {
-            setError(
-                err.response?.data?.message || "Failed to load dashboard data."
-            );
+            setError(err.response?.data?.message || "Failed to load dashboard data.");
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchDashboardStats();
+        fetchAll();
     }, []);
 
     const handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         navigate("/login");
+    };
+
+    const handleTargetSave = async () => {
+        setTargetError("");
+        const value = Number(targetInput);
+        if (!targetInput || isNaN(value) || value < 0) {
+            setTargetError("Enter a valid positive number.");
+            return;
+        }
+        try {
+            await API.put("/settings/target", { target: value });
+            setTarget(value);
+            setEditingTarget(false);
+        } catch (err) {
+            setTargetError(err.response?.data?.message || "Failed to save target.");
+        }
+    };
+
+    const startEditTarget = () => {
+        setTargetInput(target === 0 ? "" : String(target));
+        setTargetError("");
+        setEditingTarget(true);
+    };
+
+    const cancelEditTarget = () => {
+        setEditingTarget(false);
+        setTargetError("");
     };
 
     if (loading) {
@@ -41,6 +75,13 @@ function Dashboard() {
             </div>
         );
     }
+
+    const wonThisMonth = stats?.wonThisMonth || 0;
+    const progressPercent = target > 0 ? Math.min((wonThisMonth / target) * 100, 100) : 0;
+    const isAchieved = target > 0 && wonThisMonth >= target;
+
+    const now = new Date();
+    const monthLabel = now.toLocaleString("default", { month: "long", year: "numeric" });
 
     return (
         <div className="dashboard-page">
@@ -53,13 +94,74 @@ function Dashboard() {
                         <p>Welcome, {user?.name || "Admin User"}</p>
                     </div>
                     <div className="header-actions">
-                        <Link to="/leads" className="primary-link">
-                            Manage Leads
-                        </Link>
-                        <button className="logout-button" onClick={handleLogout}>
-                            Logout
-                        </button>
+                        <Link to="/leads" className="primary-link">Manage Leads</Link>
+                        <button className="logout-button" onClick={handleLogout}>Logout</button>
                     </div>
+                </div>
+
+                {/* Sales Target Tracker */}
+                <div className="bento-card target-card">
+                    <div className="target-header">
+                        <div>
+                            <h3>Monthly Sales Target</h3>
+                            <p className="target-month">{monthLabel}</p>
+                        </div>
+                        {!editingTarget && (
+                            <button className="target-edit-btn" onClick={startEditTarget}>
+                                {target === 0 ? "Set Target" : "Edit"}
+                            </button>
+                        )}
+                    </div>
+
+                    {editingTarget ? (
+                        <div className="target-edit-form">
+                            <input
+                                type="number"
+                                className="target-input"
+                                placeholder="Enter target amount"
+                                value={targetInput}
+                                onChange={(e) => setTargetInput(e.target.value)}
+                                min="0"
+                                autoFocus
+                            />
+                            {targetError && <p className="target-error">{targetError}</p>}
+                            <div className="target-edit-actions">
+                                <button className="primary-btn" onClick={handleTargetSave}>Save</button>
+                                <button className="secondary-btn" onClick={cancelEditTarget}>Cancel</button>
+                            </div>
+                        </div>
+                    ) : target === 0 ? (
+                        <p className="target-empty">No target set for this month.</p>
+                    ) : (
+                        <>
+                            <div className="target-amounts">
+                                <span className="target-won">Rs. {wonThisMonth.toLocaleString()}</span>
+                                <span className="target-divider">of</span>
+                                <span className="target-goal">Rs. {target.toLocaleString()}</span>
+                            </div>
+                            <div className="progress-bar-track">
+                                <div
+                                    className="progress-bar-fill"
+                                    style={{
+                                        width: `${progressPercent}%`,
+                                        background: isAchieved
+                                            ? "linear-gradient(90deg, #10b981, #34d399)"
+                                            : "linear-gradient(90deg, #06b6d4, #0891b2)",
+                                    }}
+                                />
+                            </div>
+                            <div className="target-footer">
+                                <span className={`target-percent ${isAchieved ? "target-achieved" : ""}`}>
+                                    {isAchieved ? "Target achieved!" : `${progressPercent.toFixed(1)}% reached`}
+                                </span>
+                                {!isAchieved && (
+                                    <span className="target-remaining">
+                                        Rs. {(target - wonThisMonth).toLocaleString()} remaining
+                                    </span>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 <div className="bento-card main-metric">

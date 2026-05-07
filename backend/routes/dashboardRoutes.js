@@ -23,7 +23,12 @@ router.get("/", authMiddleware, (req, res) => {
       COALESCE(
         SUM(CASE WHEN status = 'Won' THEN estimated_deal_value ELSE 0 END),
         0
-      ) AS totalWonDealValue
+      ) AS totalWonDealValue,
+
+      COALESCE(
+        SUM(CASE WHEN status = 'Won' AND strftime('%Y-%m', updated_at) = strftime('%Y-%m', 'now') THEN estimated_deal_value ELSE 0 END),
+        0
+      ) AS wonThisMonth
 
     FROM leads
   `;
@@ -44,6 +49,7 @@ router.get("/", authMiddleware, (req, res) => {
             lostLeads: row.lostLeads || 0,
             totalEstimatedDealValue: row.totalEstimatedDealValue || 0,
             totalWonDealValue: row.totalWonDealValue || 0,
+            wonThisMonth: row.wonThisMonth || 0,
         });
     });
 });
