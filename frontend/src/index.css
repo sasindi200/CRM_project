@@ -9,10 +9,8 @@ body {
   color: #f8fafc;
 }
 
-/* =========================
-   LOGIN PAGE
-========================= */
 
+/*Login page*/
 .login-page {
   min-height: 100vh;
   display: flex;
@@ -339,9 +337,7 @@ button:disabled {
   margin: 4px 0;
 }
 
-/* =========================
-   DASHBOARD PAGE
-========================= */
+/*DASHBOARD PAGE*/
 
 .dashboard-page {
   padding: 32px;
@@ -378,9 +374,7 @@ button:disabled {
   animation-delay: -10s;
 }
 
-/* =========================
-   BENTO DASHBOARD LAYOUT
-========================= */
+/*BENTO DASHBOARD LAYOUT*/
 
 .bento-grid {
   display: grid;
@@ -536,9 +530,7 @@ button:disabled {
   border-color: rgba(239, 68, 68, 0.5);
 }
 
-/* =========================
-   SALES TARGET TRACKER
-========================= */
+/*SALES TARGET TRACKER*/
 
 .target-card {
   grid-column: span 4;
@@ -687,9 +679,7 @@ button:disabled {
   margin: 0;
 }
 
-/* =========================
-   COMMON PAGE LAYOUT
-========================= */
+/*COMMON PAGE LAYOUT*/
 
 .page-container {
   padding: 32px;
@@ -722,9 +712,7 @@ button:disabled {
   -webkit-backdrop-filter: blur(24px);
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
+/*RESPONSIVE*/
 
 @media (max-width: 1024px) {
   .bento-grid {
