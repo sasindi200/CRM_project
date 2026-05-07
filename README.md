@@ -33,12 +33,81 @@ This CRM allows a sales team to track leads through the sales pipeline — from 
 - **JWT Authentication** — Login with a hardcoded test user; token stored in `localStorage` and sent on every API request via an Axios interceptor.
 - **Protected Routes** — All pages except `/login` are behind a `ProtectedRoute` component that checks for a valid token.
 - **Dashboard** — Bento-grid layout showing total leads, leads by status (New / Qualified / Won / Lost), total estimated deal value, and total won deal value.
-- **Lead List** — Paginated table of all leads with filter controls for status, lead source, assigned salesperson, and a free-text search across name, company, and email.
+- **Lead List** — Table of all leads with filter controls for status, lead source, assigned salesperson, and a free-text search across name, company, and email.
 - **Lead CRUD** — Create, read, update, and delete leads. Required fields: lead name, company name, email.
 - **Lead Detail View** — Full profile of a single lead including all field values, timestamps, and a notes section.
 - **Notes** — Add internal notes to any lead; notes are stored with the author name and timestamp.
 - **Lead Statuses** — New, Contacted, Qualified, Proposal Sent, Won, Lost.
 - **Lead Sources** — Website, LinkedIn, Referral, Cold Email, Event, Other.
+
+---
+
+## Project Structure
+
+```
+CRM_project/
+├── backend/
+│   ├── database/          # SQLite database file (auto-created, gitignored)
+│   ├── middleware/
+│   │   └── authMiddleware.js  # JWT verification middleware
+│   ├── routes/
+│   │   ├── authRoutes.js      # POST /api/auth/login
+│   │   ├── dashboardRoutes.js # GET /api/dashboard
+│   │   ├── leadRoutes.js      # CRUD /api/leads
+│   │   └── settingsRoutes.js  # GET/PUT /api/settings/target
+│   ├── db.js              # SQLite connection and schema init
+│   ├── server.js          # Express app entry point
+│   └── package.json
+└── frontend/
+    ├── public/
+    ├── src/
+    │   ├── components/
+    │   │   └── ProtectedRoute.jsx
+    │   ├── pages/
+    │   │   ├── Dashboard.jsx
+    │   │   ├── LeadDetail.jsx
+    │   │   ├── LeadForm.jsx
+    │   │   ├── LeadList.jsx
+    │   │   └── Login.jsx
+    │   ├── api.js         # Axios instance with JWT interceptor
+    │   └── App.jsx        # Router and route definitions
+    └── package.json
+```
+
+---
+
+## API Endpoints
+
+All endpoints except `/api/auth/login` require an `Authorization: Bearer <token>` header.
+
+### Auth
+| Method | Endpoint          | Description        |
+|--------|-------------------|--------------------|
+| POST   | `/api/auth/login` | Log in, get JWT    |
+
+### Leads
+| Method | Endpoint           | Description                                      |
+|--------|--------------------|--------------------------------------------------|
+| GET    | `/api/leads`       | List all leads (supports `status`, `source`, `salesperson`, `search` query params) |
+| POST   | `/api/leads`       | Create a new lead                                |
+| GET    | `/api/leads/:id`   | Get a single lead                                |
+| PUT    | `/api/leads/:id`   | Update a lead                                    |
+| DELETE | `/api/leads/:id`   | Delete a lead (cascades to notes)                |
+
+### Notes
+| Method | Endpoint                          | Description         |
+|--------|-----------------------------------|---------------------|
+| GET    | `/api/leads/:id/notes`            | Get notes for a lead |
+| POST   | `/api/leads/:id/notes`            | Add a note           |
+| PUT    | `/api/leads/:id/notes/:noteId`    | Edit a note          |
+| DELETE | `/api/leads/:id/notes/:noteId`    | Delete a note        |
+
+### Dashboard & Settings
+| Method | Endpoint                   | Description                  |
+|--------|----------------------------|------------------------------|
+| GET    | `/api/dashboard`           | Get pipeline summary stats   |
+| GET    | `/api/settings/target`     | Get monthly sales target     |
+| PUT    | `/api/settings/target`     | Update monthly sales target  |
 
 ---
 
@@ -93,14 +162,14 @@ The frontend will run on **http://localhost:5173** (default Vite port).
 Create a file at `backend/.env` with the following:
 
 ```env
-JWT_SECRET=crm_secret_key_123
+JWT_SECRET=your_secret_key_here
 ```
 
-| Variable     | Description                                      | Default (from repo) |
-|--------------|--------------------------------------------------|---------------------|
-| `JWT_SECRET` | Secret key used to sign and verify JWT tokens    | `crm_secret_key_123` |
+| Variable     | Description                                   |
+|--------------|-----------------------------------------------|
+| `JWT_SECRET` | Secret key used to sign and verify JWT tokens |
 
-> **Note:** The `.env` file is already present in the repo for convenience. In a real deployment, this should be removed from version control and replaced with a strong, randomly generated secret.
+> **Note:** The `.env` file is excluded from version control via `.gitignore`. Never commit your `.env` file or share your secret key publicly.
 
 ---
 
@@ -117,7 +186,7 @@ Authentication uses a single hardcoded user defined in `backend/routes/authRoute
 
 ## Database Setup
 
-No manual database setup is required. On first run, `initDatabase()` in `backend/db.js` automatically creates the SQLite file at `backend/database/crm.db` and runs `CREATE TABLE IF NOT EXISTS` for the two tables:
+No manual database setup is required. On first run, `initDatabase()` in `backend/db.js` automatically creates the SQLite file at `backend/database/crm.db` and runs `CREATE TABLE IF NOT EXISTS` for all three tables:
 
 **`leads`**
 
@@ -145,14 +214,22 @@ No manual database setup is required. On first run, `initDatabase()` in `backend
 | `created_by`    | TEXT    | Default: `Admin User`                        |
 | `created_at`    | TEXT    | Default: `CURRENT_TIMESTAMP`                 |
 
+**`settings`**
+
+| Column  | Type | Notes         |
+|---------|------|---------------|
+| `key`   | TEXT | Primary key   |
+| `value` | TEXT | Required      |
+
+> Used to persist the monthly sales target set from the dashboard.
+
 To reset the database, simply delete `backend/database/crm.db` and restart the server.
 
 ---
 
 ## Known Limitations
 
-- **Single hardcoded user** — Authentication does not use a `users` table. There is no registration, password reset, or multi-user support. The credentials are stored in plain text in the source code.
-- **No real password hashing** — `bcryptjs` is installed as a dependency but is not used. The login check is a plain string comparison.
+- **Single hardcoded user** — Authentication does not use a `users` table. There is no registration, password reset, or multi-user support.
 - **No pagination** — The lead list fetches all records in a single query with no limit, which will degrade with large datasets.
 - **CORS is fully open** — The backend uses `cors()` with no origin restrictions, which is not safe for production.
 - **Frontend API base URL is hardcoded** — `api.js` points to `http://localhost:5000/api`. This needs to be changed or environment-variable-driven before deploying anywhere.
@@ -167,7 +244,7 @@ To reset the database, simply delete `backend/database/crm.db` and restart the s
 
 This project covers the core CRUD cycle of a CRM and demonstrates a clean separation between a React SPA and a REST API backend. The use of SQLite keeps local setup completely friction-free — there's no database server to install or configure.
 
-A few things I'd approach differently in a production context: authentication would be backed by a proper `users` table with hashed passwords (the bcryptjs dependency is already there, just not wired up), CORS would be locked to specific origins, and the frontend's API base URL would be pulled from an environment variable at build time using Vite's `import.meta.env`. Adding a state management layer (Zustand or React Query) would also reduce the amount of repetitive `useState`/`useEffect` data-fetching boilerplate scattered across the page components.
+A few things I'd approach differently in a production context: authentication would be backed by a proper `users` table rather than a single hardcoded user, CORS would be locked to specific origins, and the frontend's API base URL would be pulled from an environment variable at build time using Vite's `import.meta.env`. Adding a state management layer (Zustand or React Query) would also reduce the amount of repetitive `useState`/`useEffect` data-fetching boilerplate scattered across the page components.
 
 Created by:
 Sasindi Linasha Korala

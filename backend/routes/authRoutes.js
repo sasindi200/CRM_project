@@ -1,18 +1,19 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
 const router = express.Router();
 
-// Hardcoded test user for assessment
+// Hardcoded test user for assessment (password: "password123")
 const testUser = {
     id: 1,
     name: "Admin User",
     email: "admin@example.com",
-    password: "password123",
+    password: "$2b$10$SnAzAwt2GDGVDDGf8ImfjewmzuqhNWFlFDuLI0AeZ/XRhaUB3UWbG",
 };
 
 // POST /api/auth/login
-router.post("/login", (req, res) => {
+router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     // Check empty fields
@@ -23,7 +24,9 @@ router.post("/login", (req, res) => {
     }
 
     // Check credentials
-    if (email !== testUser.email || password !== testUser.password) {
+    const emailMatch = email === testUser.email;
+    const passwordMatch = emailMatch && await bcrypt.compare(password, testUser.password);
+    if (!emailMatch || !passwordMatch) {
         return res.status(401).json({
             message: "Invalid email or password.",
         });
